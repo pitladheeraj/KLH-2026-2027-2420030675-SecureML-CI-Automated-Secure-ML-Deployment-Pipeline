@@ -12,7 +12,7 @@ import joblib
 import pandas as pd
 from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import cross_val_score, train_test_split
 
 
 def train(data_path: str, model_path: str, metrics_path: str) -> dict:
@@ -43,13 +43,22 @@ def train(data_path: str, model_path: str, metrics_path: str) -> dict:
     )
     model.fit(x_train, y_train)
 
-    # 4. Evaluation
+       # 4. Evaluation & 5-Fold Cross-Validation
     y_pred = model.predict(x_test)
+    cv_scores = cross_val_score(model, x, y, cv=5)
+    
+    # Identify top clinical risk predictor
+    top_feature_idx = int(model.feature_importances_.argmax())
+    top_feature_name = feature_cols[top_feature_idx]
+
     metrics = {
         "accuracy": round(float(accuracy_score(y_test, y_pred)), 4),
         "precision": round(float(precision_score(y_test, y_pred, zero_division=0)), 4),
         "recall": round(float(recall_score(y_test, y_pred, zero_division=0)), 4),
         "f1_score": round(float(f1_score(y_test, y_pred, zero_division=0)), 4),
+        "cv_mean_accuracy": round(float(cv_scores.mean()), 4),
+        "cv_std_accuracy": round(float(cv_scores.std()), 4),
+        "top_clinical_factor": top_feature_name,
         "test_samples": int(len(y_test)),
         "feature_names": feature_cols,
     }
