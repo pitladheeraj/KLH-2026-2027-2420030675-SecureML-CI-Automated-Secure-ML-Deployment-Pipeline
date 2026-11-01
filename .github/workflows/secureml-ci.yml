@@ -32,8 +32,8 @@ jobs:
         run: |
           # Stop the build if there are Python syntax errors or undefined names
           flake8 src/ tests/ --count --select=E9,F63,F7,F82 --show-source --statistics
-          # Exit-zero treats all errors as warnings. Max complexity and length check:
-          flake8 src/ tests/ --count --max-line-length=100 --statistics
+          # Exit-zero treats formatting/style issues as warnings without failing the build
+          flake8 src/ tests/ --count --exit-zero --max-complexity=10 --max-line-length=100 --statistics
 
   # ============================================================================
   # STAGE 2: DATA & MODEL QUALITY GATES

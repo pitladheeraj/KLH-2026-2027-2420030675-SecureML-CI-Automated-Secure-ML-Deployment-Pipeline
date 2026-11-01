@@ -1,8 +1,6 @@
 """Tests for ML Training and Validation Gates."""
 
-import json
 import os
-import pytest
 from src.train import train
 from src.validate import validate_data, validate_model_performance
 
@@ -22,7 +20,7 @@ def test_data_validation():
 def test_model_training_and_artifacts():
     """Verify training executes and writes expected artifacts."""
     metrics = train(DATA_PATH, TMP_MODEL_PATH, TMP_METRICS_PATH)
-    
+
     assert os.path.exists(TMP_MODEL_PATH), "Model artifact should be generated."
     assert os.path.exists(TMP_METRICS_PATH), "Metrics file should be generated."
     assert "accuracy" in metrics
