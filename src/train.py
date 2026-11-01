@@ -12,7 +12,7 @@ import joblib
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import cross_val_score, train_test_split
 
 FEATURE_COLS = [
     "credit_score",
@@ -49,19 +49,28 @@ def train(data_path: str, model_path: str, metrics_path: str) -> dict:
         x, y, test_size=0.20, random_state=42, stratify=y
     )
 
-    # 3. Model Training
+    # 3. Model Training: Random Forest
     model = RandomForestClassifier(
         n_estimators=100, max_depth=8, random_state=42
     )
     model.fit(x_train, y_train)
 
-    # 4. Evaluation
+    # 4. Evaluation & 5-Fold Cross-Validation
     y_pred = model.predict(x_test)
+    cv_scores = cross_val_score(model, x, y, cv=5)
+
+    # Identify top churn risk predictor
+    top_feature_idx = int(model.feature_importances_.argmax())
+    top_feature_name = FEATURE_COLS[top_feature_idx]
+
     metrics = {
         "accuracy": round(float(accuracy_score(y_test, y_pred)), 4),
         "precision": round(float(precision_score(y_test, y_pred, zero_division=0)), 4),
         "recall": round(float(recall_score(y_test, y_pred, zero_division=0)), 4),
         "f1_score": round(float(f1_score(y_test, y_pred, zero_division=0)), 4),
+        "cv_mean_accuracy": round(float(cv_scores.mean()), 4),
+        "cv_std_accuracy": round(float(cv_scores.std()), 4),
+        "top_churn_factor": top_feature_name,
         "test_samples": int(len(y_test)),
         "feature_names": FEATURE_COLS,
     }
