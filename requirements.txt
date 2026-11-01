@@ -1,0 +1,19 @@
+# Core Machine Learning & Data Processing
+scikit-learn>=1.4.0
+pandas>=2.2.0
+numpy>=1.26.0
+joblib>=1.3.2
+
+# Serving & API Framework
+fastapi>=0.110.0
+uvicorn[standard]>=0.28.0
+pydantic>=2.6.0
+
+# Testing & Quality
+pytest>=8.0.0
+httpx>=0.27.0
+flake8>=7.0.0
+
+# Shift-Left Security Scanners
+bandit>=1.7.8
+pip-audit>=2.7.2

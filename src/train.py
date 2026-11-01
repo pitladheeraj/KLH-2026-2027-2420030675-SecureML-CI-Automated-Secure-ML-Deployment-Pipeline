@@ -1,0 +1,87 @@
+"""SecureML-CI: ML Training Module.
+
+Trains a classification model for heart disease risk prediction,
+evaluates metrics on a held-out test split, and serializes both
+the model artifact and evaluation metrics.
+"""
+
+import argparse
+import json
+import os
+import joblib
+import pandas as pd
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
+from sklearn.model_selection import train_test_split
+
+
+def train(data_path: str, model_path: str, metrics_path: str) -> dict:
+    """Train the model, evaluate performance, and save artifacts."""
+    if not os.path.exists(data_path):
+        raise FileNotFoundError(f"Training dataset not found at {data_path}")
+
+    # 1. Load data
+    df = pd.read_csv(data_path)
+    if "target" not in df.columns:
+        raise ValueError("Missing 'target' column in dataset")
+
+    feature_cols = [col for col in df.columns if col != "target"]
+    x = df[feature_cols]
+    y = df["target"]
+
+    # 2. Train / Test Split
+    x_train, x_test, y_train, y_test = train_test_split(
+        x, y, test_size=0.25, random_state=42, stratify=y
+    )
+
+    # 3. Model Training
+    model = RandomForestClassifier(
+        n_estimators=100, max_depth=5, random_state=42
+    )
+    model.fit(x_train, y_train)
+
+    # 4. Evaluation
+    y_pred = model.predict(x_test)
+    metrics = {
+        "accuracy": round(float(accuracy_score(y_test, y_pred)), 4),
+        "precision": round(float(precision_score(y_test, y_pred, zero_division=0)), 4),
+        "recall": round(float(recall_score(y_test, y_pred, zero_division=0)), 4),
+        "f1_score": round(float(f1_score(y_test, y_pred, zero_division=0)), 4),
+        "test_samples": int(len(y_test)),
+        "feature_names": feature_cols,
+    }
+
+    # 5. Persist artifacts
+    os.makedirs(os.path.dirname(model_path), exist_ok=True)
+    joblib.dump(model, model_path)
+    print(f"[+] Model artifact successfully saved to: {model_path}")
+
+    os.makedirs(os.path.dirname(metrics_path), exist_ok=True)
+    with open(metrics_path, "w", encoding="utf-8") as f:
+        json.dump(metrics, f, indent=4)
+    print(f"[+] Training metrics successfully saved to: {metrics_path}")
+    print(f"[+] Evaluation Results: {json.dumps(metrics, indent=2)}")
+
+    return metrics
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="SecureML-CI Training Module")
+    parser.add_argument(
+        "--data-path",
+        default="data/heart_disease.csv",
+        help="Path to training CSV file",
+    )
+    parser.add_argument(
+        "--model-path",
+        default="models/model.joblib",
+        help="Path to save trained model artifact",
+    )
+    parser.add_argument(
+        "--metrics-path",
+        default="models/metrics.json",
+        help="Path to save evaluation metrics",
+    )
+
+    args = parser.parse_args()
+    train(args.data_path, args.model_path, args.metrics_path)
