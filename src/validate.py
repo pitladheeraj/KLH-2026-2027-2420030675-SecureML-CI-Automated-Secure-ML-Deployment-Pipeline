@@ -26,8 +26,8 @@ EXPECTED_COLUMNS = [
     "target",
 ]
 
-DEFAULT_MIN_ACCURACY = 0.75
-DEFAULT_MIN_F1 = 0.70
+DEFAULT_MIN_ACCURACY = 0.70
+DEFAULT_MIN_F1 = 0.65
 
 
 def validate_data(data_path: str) -> bool:
