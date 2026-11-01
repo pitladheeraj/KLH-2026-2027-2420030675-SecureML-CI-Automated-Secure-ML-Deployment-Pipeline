@@ -10,7 +10,7 @@ import json
 import os
 import joblib
 import pandas as pd
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
 from sklearn.model_selection import train_test_split
 
@@ -34,9 +34,12 @@ def train(data_path: str, model_path: str, metrics_path: str) -> dict:
         x, y, test_size=0.25, random_state=42, stratify=y
     )
 
-    # 3. Model Training
-    model = RandomForestClassifier(
-        n_estimators=100, max_depth=5, random_state=42
+      # 3. Upgraded Model: Gradient Boosting Classifier
+    model = GradientBoostingClassifier(
+        n_estimators=120,
+        learning_rate=0.08,
+        max_depth=4,
+        random_state=42
     )
     model.fit(x_train, y_train)
 
