@@ -67,8 +67,10 @@ jobs:
           python src/validate.py --data-path data/heart_disease.csv --metrics-path models/metrics.json --min-accuracy 0.70 --min-f1 0.65
 
       - name: Run Pytest Test Suite
+        env:
+          PYTHONPATH: .
         run: |
-          pytest -v tests/
+          python -m pytest -v tests/
 
       - name: Upload Trained Model Artifacts
         uses: actions/upload-artifact@v4
