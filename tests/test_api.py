@@ -20,7 +20,7 @@ def test_root_endpoint():
     response = client.get("/")
     assert response.status_code == 200
     data = response.json()
-    assert data["service"] == "SecureML-CI Prediction API"
+    assert "SecureML-CI" in data["service"]
     assert "docs_url" in data
 
 
@@ -31,16 +31,20 @@ def test_health_check():
 
 
 def test_predict_endpoint_success():
-    """Test POST /predict with a valid patient payload."""
+    """Test POST /predict with a valid bank customer churn payload."""
     payload = {
-        "age": 55,
-        "sex": 1,
-        "resting_bp": 140.0,
-        "cholesterol": 240.0,
-        "fasting_bs": 0,
-        "max_heart_rate": 150.0,
-        "exercise_angina": 0,
-        "oldpeak": 1.2,
+        "credit_score": 650,
+        "gender": 1,
+        "age": 42,
+        "tenure": 3,
+        "balance": 75000.0,
+        "num_of_products": 1,
+        "has_cr_card": 1,
+        "is_active_member": 0,
+        "estimated_salary": 95000.0,
+        "complain": 1,
+        "satisfaction_score": 2,
+        "point_earned": 350,
     }
     response = client.post("/predict", json=payload)
     if response.status_code == 200:
@@ -57,9 +61,9 @@ def test_predict_endpoint_success():
 def test_predict_endpoint_validation_error():
     """Test POST /predict rejects invalid payload with HTTP 422."""
     invalid_payload = {
-        "age": 250,  # Invalid: greater than 120
-        "sex": 5,    # Invalid: not 0 or 1
-        "resting_bp": 10.0,
+        "credit_score": 100,  # Invalid: less than 300
+        "gender": 5,          # Invalid: not 0 or 1
+        "age": 250,           # Invalid: greater than 110
     }
     response = client.post("/predict", json=invalid_payload)
     assert response.status_code == 422, "API must reject out-of-bounds input schema."

@@ -1,6 +1,6 @@
-"""SecureML-CI: ML Training Module.
+"""SecureML-CI: Banking Customer Churn Training Module.
 
-Trains a classification model for heart disease risk prediction,
+Trains a classification model to predict bank customer churn,
 evaluates metrics on a held-out test split, and serializes both
 the model artifact and evaluation metrics.
 """
@@ -14,29 +14,44 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
 from sklearn.model_selection import train_test_split
 
+FEATURE_COLS = [
+    "credit_score",
+    "gender",
+    "age",
+    "tenure",
+    "balance",
+    "num_of_products",
+    "has_cr_card",
+    "is_active_member",
+    "estimated_salary",
+    "complain",
+    "satisfaction_score",
+    "point_earned",
+]
+TARGET_COL = "target"
+
 
 def train(data_path: str, model_path: str, metrics_path: str) -> dict:
-    """Train the model, evaluate performance, and save artifacts."""
+    """Train the churn classification model, evaluate performance, and save artifacts."""
     if not os.path.exists(data_path):
         raise FileNotFoundError(f"Training dataset not found at {data_path}")
 
     # 1. Load data
     df = pd.read_csv(data_path)
-    if "target" not in df.columns:
-        raise ValueError("Missing 'target' column in dataset")
+    if TARGET_COL not in df.columns:
+        raise ValueError(f"Missing '{TARGET_COL}' target column in dataset")
 
-    feature_cols = [col for col in df.columns if col != "target"]
-    x = df[feature_cols]
-    y = df["target"]
+    x = df[FEATURE_COLS]
+    y = df[TARGET_COL]
 
     # 2. Train / Test Split
     x_train, x_test, y_train, y_test = train_test_split(
-        x, y, test_size=0.25, random_state=42, stratify=y
+        x, y, test_size=0.20, random_state=42, stratify=y
     )
 
     # 3. Model Training
     model = RandomForestClassifier(
-        n_estimators=100, max_depth=5, random_state=42
+        n_estimators=100, max_depth=8, random_state=42
     )
     model.fit(x_train, y_train)
 
@@ -48,7 +63,7 @@ def train(data_path: str, model_path: str, metrics_path: str) -> dict:
         "recall": round(float(recall_score(y_test, y_pred, zero_division=0)), 4),
         "f1_score": round(float(f1_score(y_test, y_pred, zero_division=0)), 4),
         "test_samples": int(len(y_test)),
-        "feature_names": feature_cols,
+        "feature_names": FEATURE_COLS,
     }
 
     # 5. Persist artifacts
@@ -66,10 +81,10 @@ def train(data_path: str, model_path: str, metrics_path: str) -> dict:
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="SecureML-CI Training Module")
+    parser = argparse.ArgumentParser(description="SecureML-CI Banking Training")
     parser.add_argument(
         "--data-path",
-        default="data/heart_disease.csv",
+        default="data/customer_churn.csv",
         help="Path to training CSV file",
     )
     parser.add_argument(

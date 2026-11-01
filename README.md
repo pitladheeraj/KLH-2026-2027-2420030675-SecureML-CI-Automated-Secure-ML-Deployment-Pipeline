@@ -45,8 +45,8 @@ flowchart LR
 
 | Module | Purpose | Technology |
 | :--- | :--- | :--- |
-| **ML Training** | Trains Random Forest on clinical data and generates serialized artifacts. | `scikit-learn`, `pandas`, `joblib` |
-| **Validation Gate** | Enforces data schema integrity and minimum accuracy ($\ge 75\%$) & F1 ($\ge 70\%$). | `src/validate.py`, `pytest` |
+| **ML Training** | Trains classification models on customer churn / tabular data. | `scikit-learn`, `pandas`, `joblib` |
+| **Validation Gate** | Enforces data schema integrity and minimum accuracy ($\ge 80\%$) & F1 ($\ge 70\%$). | `src/validate.py`, `pytest` |
 | **Security Auditing** | Shift-left security for code, packages, secrets, and container image. | `Bandit`, `pip-audit`, `Gitleaks`, `Trivy` |
 | **Serving & API** | Production REST API with schema validation & health checks. | `FastAPI`, `Uvicorn`, `Pydantic` |
 | **Packaging** | Hardened container running under an unprivileged non-root user. | `Docker (python:3.11-slim)` |
@@ -60,14 +60,28 @@ flowchart LR
 SecureML-CI/
 ├── .github/
 │   └── workflows/
-│       └── secureml-ci.yml    # 5-Stage GitHub Actions pipeline
+│       └── secureml-ci.yml    # 4-Stage DevSecMLOps GitHub Actions pipeline
 ├── data/
+│   ├── customer_churn.csv     # Bank customer churn dataset (10,000 records)
 │   └── heart_disease.csv      # Clinical benchmark dataset
 ├── models/
 │   ├── model.joblib           # Trained model artifact
 │   └── metrics.json           # Evaluation metrics (Accuracy, F1, Precision)
 ├── src/
+│   ├── __init__.py
+│   ├── app.py                 # FastAPI inference service
 │   ├── train.py               # Model training script
+│   └── validate.py            # Quality gate assertion script
+├── tests/
+│   ├── __init__.py
+│   ├── test_api.py            # API integration & validation tests
+│   └── test_model.py          # Data validation & model threshold tests
+├── .flake8                    # Flake8 linter configuration
+├── .gitignore                 # Git ignore rules
+├── .gitleaks.toml             # Secret scanner configuration
+├── Dockerfile                 # Production hardened container
+└── requirements.txt           # Pinned production & testing dependencies
+```
 │   ├── validate.py            # Quality gate validation script
 │   └── app.py                 # FastAPI prediction web service
 ├── tests/

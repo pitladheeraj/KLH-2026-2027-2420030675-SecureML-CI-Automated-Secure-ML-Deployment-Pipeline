@@ -59,12 +59,12 @@ jobs:
 
       - name: Train Machine Learning Model
         run: |
-          python src/train.py --data-path data/heart_disease.csv --model-path models/model.joblib --metrics-path models/metrics.json
+          python src/train.py --data-path data/customer_churn.csv --model-path models/model.joblib --metrics-path models/metrics.json
 
       - name: Execute Quality Gate (Data & Accuracy Assertion)
         run: |
           # Enforces minimum accuracy and F1 thresholds. Halts pipeline if criteria fail.
-          python src/validate.py --data-path data/heart_disease.csv --metrics-path models/metrics.json --min-accuracy 0.70 --min-f1 0.65
+          python src/validate.py --data-path data/customer_churn.csv --metrics-path models/metrics.json --min-accuracy 0.80 --min-f1 0.70
 
       - name: Run Pytest Test Suite
         env:
@@ -158,8 +158,8 @@ jobs:
         run: |
           curl --fail --retry 5 --retry-delay 2 http://localhost:8000/health
 
-      - name: 4.4 Smoke Test /predict Endpoint with Clinical Payload
+      - name: 4.4 Smoke Test /predict Endpoint with Banking Churn Payload
         run: |
           curl --fail -X POST http://localhost:8000/predict \
             -H "Content-Type: application/json" \
-            -d '{"age": 55, "sex": 1, "resting_bp": 130.0, "cholesterol": 240.0, "fasting_bs": 0, "max_heart_rate": 155.0, "exercise_angina": 0, "oldpeak": 1.2}'
+            -d '{"credit_score": 650, "gender": 1, "age": 42, "tenure": 3, "balance": 75000.0, "num_of_products": 1, "has_cr_card": 1, "is_active_member": 0, "estimated_salary": 95000.0, "complain": 1, "satisfaction_score": 2, "point_earned": 350}'

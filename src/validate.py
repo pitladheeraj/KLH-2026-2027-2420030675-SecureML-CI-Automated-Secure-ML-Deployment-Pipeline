@@ -1,4 +1,4 @@
-"""SecureML-CI: Validation & Quality Gate Module.
+"""SecureML-CI: Banking Churn Validation & Quality Gate Module.
 
 Enforces two levels of quality gates:
 1. Data Quality Gate: Schema, missing values, column integrity, and range assertions.
@@ -15,25 +15,29 @@ import sys
 import pandas as pd
 
 EXPECTED_COLUMNS = [
+    "credit_score",
+    "gender",
     "age",
-    "sex",
-    "resting_bp",
-    "cholesterol",
-    "fasting_bs",
-    "max_heart_rate",
-    "exercise_angina",
-    "oldpeak",
+    "tenure",
+    "balance",
+    "num_of_products",
+    "has_cr_card",
+    "is_active_member",
+    "estimated_salary",
+    "complain",
+    "satisfaction_score",
+    "point_earned",
     "target",
 ]
 
-DEFAULT_MIN_ACCURACY = 0.70
-DEFAULT_MIN_F1 = 0.65
+DEFAULT_MIN_ACCURACY = 0.80
+DEFAULT_MIN_F1 = 0.70
 
 
 def validate_data(data_path: str) -> bool:
     """Validate data integrity, required schema, nulls, and value ranges."""
     print("=" * 60)
-    print("STAGE 1: DATA QUALITY GATE")
+    print("STAGE 1: DATA QUALITY GATE (BANKING CHURN)")
     print("=" * 60)
 
     if not os.path.exists(data_path):
@@ -43,8 +47,8 @@ def validate_data(data_path: str) -> bool:
     df = pd.read_csv(data_path)
 
     # 1. Row count check
-    if len(df) < 20:
-        print(f"[FAIL] Dataset is too small ({len(df)} rows). Minimum required is 20 rows.")
+    if len(df) < 50:
+        print(f"[FAIL] Dataset is too small ({len(df)} rows). Minimum required is 50 rows.")
         return False
 
     # 2. Schema check
@@ -60,22 +64,26 @@ def validate_data(data_path: str) -> bool:
         return False
 
     # 4. Domain value ranges
-    if not df["age"].between(1, 120).all():
-        print("[FAIL] 'age' contains values outside valid domain [1, 120].")
+    if not df["age"].between(18, 110).all():
+        print("[FAIL] 'age' contains values outside valid domain [18, 110].")
+        return False
+
+    if not df["credit_score"].between(300, 900).all():
+        print("[FAIL] 'credit_score' contains values outside valid domain [300, 900].")
         return False
 
     if not df["target"].isin([0, 1]).all():
         print("[FAIL] 'target' contains invalid labels. Must be binary {0, 1}.")
         return False
 
-    print(f"[PASS] Data quality gate passed. Verified {len(df)} rows and {len(df.columns)} columns.")
+    print(f"[PASS] Data quality gate passed. Verified {len(df)} customer records.")
     return True
 
 
 def validate_model_performance(metrics_path: str, min_accuracy: float, min_f1: float) -> bool:
     """Enforce minimum model quality gates."""
     print("\n" + "=" * 60)
-    print("STAGE 2: MODEL QUALITY GATE")
+    print("STAGE 2: MODEL QUALITY GATE (BANKING CHURN)")
     print("=" * 60)
 
     if not os.path.exists(metrics_path):
@@ -99,7 +107,7 @@ def validate_model_performance(metrics_path: str, min_accuracy: float, min_f1: f
         print(f"[FAIL] F1-Score gate failed: {f1:.4f} < {min_f1:.4f}")
         return False
 
-    print("[PASS] Model performance gate passed! Model meets release criteria.")
+    print("[PASS] Model performance gate passed! Model meets banking release criteria.")
     return True
 
 
@@ -120,9 +128,17 @@ def run_quality_gates(data_path: str, metrics_path: str, min_accuracy: float, mi
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="SecureML-CI Quality Gates")
-    parser.add_argument("--data-path", default="data/heart_disease.csv", help="Path to CSV dataset")
-    parser.add_argument("--metrics-path", default="models/metrics.json", help="Path to metrics JSON")
+    parser = argparse.ArgumentParser(description="SecureML-CI Banking Quality Gates")
+    parser.add_argument(
+        "--data-path",
+        default="data/customer_churn.csv",
+        help="Path to CSV dataset",
+    )
+    parser.add_argument(
+        "--metrics-path",
+        default="models/metrics.json",
+        help="Path to metrics JSON",
+    )
     parser.add_argument(
         "--min-accuracy",
         type=float,
