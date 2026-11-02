@@ -67,3 +67,11 @@ def test_predict_endpoint_validation_error():
     }
     response = client.post("/predict", json=invalid_payload)
     assert response.status_code == 422, "API must reject out-of-bounds input schema."
+def test_model_info_endpoint():
+    """Test GET /model-info returns governance metadata."""
+    response = client.get("/model-info")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["model_type"] == "RandomForestClassifier"
+    assert data["domain"] == "Banking Customer Churn"
+    assert data["features_count"] == 12
