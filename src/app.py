@@ -108,7 +108,19 @@ def health():
             detail={"status": "unhealthy", "model_loaded": False},
         )
     return {"status": "healthy", "model_loaded": True}
-
+# ============================================================================
+# NEW FEATURE: Governance & Model Metadata Endpoint
+# ============================================================================
+@app.get("/model-info", tags=["Governance"])
+def model_info():
+    """Retrieve model metadata and deployment specifications for auditing."""
+    return {
+        "model_type": "RandomForestClassifier",
+        "domain": "Banking Customer Churn",
+        "version": "2.0.0",
+        "features_count": 12,
+        "status": "active" if model is not None else "unloaded",
+    }
 
 @app.post("/predict", response_model=PredictionOutput, tags=["Inference"])
 def predict(payload: PredictionInput):
