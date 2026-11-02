@@ -181,7 +181,3 @@ curl -X POST http://localhost:8000/predict \
 
 ---
 
-## 7. How to Demonstrate in Review-2
-1. **Happy Path Demonstration:** Show a successful push to `main` with all 5 stages in GitHub Actions passing green.
-2. **Quality Gate Failure:** Lower the accuracy threshold in `validate.py` or feed corrupted data to prove the pipeline stops deployment.
-3. **Security Gate Failure:** Add a dummy API token or vulnerable package to demonstrate automated detection by Gitleaks / pip-audit.
